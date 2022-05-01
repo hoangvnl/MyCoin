@@ -30,13 +30,6 @@ class Block {
     return this.blockchain[this.blockchain.length - 1];
   }
 
-  addNewBlock(newBlock) {
-    newBlock.precedingHash = this.obtainLatestBlock().hash;
-    //newBlock.hash = newBlock.computeHash();
-    newBlock.proofOfWork(this.difficulty);
-    this.blockchain.push(newBlock);
-  }
-
   generateNextBlock(blockData) {
     const previousBlock = this.getLatestBlock();
     const nextIndex = previousBlock.index + 1;
@@ -60,7 +53,7 @@ class Block {
   calculateHashForBlock = (block) =>
     calculateHash(block.index, block.previousHash, block.timestamp, block.data);
 
-  checkValidNewBlock(newBlock, previousBlock) {
+  isValidNewBlock(newBlock, previousBlock) {
     if (previousBlock.index + 1 !== newBlock.index) {
       console.log("invalid index");
       return false;
@@ -73,6 +66,34 @@ class Block {
     }
     return true;
   }
+
+  isValidChain = (blockchainToValidate) => {
+    const isValidGenesis = (block) => {
+      return JSON.stringify(block) === JSON.stringify(this.getGenesisBlock());
+    };
+
+    if (!isValidGenesis(blockchainToValidate[0])) {
+      return false;
+    }
+
+    for (let i = 1; i < blockchainToValidate.length; i++) {
+      if (
+        !isValidNewBlock(blockchainToValidate[i], blockchainToValidate[i - 1])
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  replaceChain = (newBlocks) => {
+    if (isValidChain(newBlocks) && newBlocks.length > blockchain.length) {
+      console.log("new blockchain is valid");
+      blockchain = newBlocks;
+    } else {
+      console.log("received blockchain invalid");
+    }
+  };
 }
 
 export default Block;
