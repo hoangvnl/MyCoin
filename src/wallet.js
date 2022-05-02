@@ -1,5 +1,5 @@
 import pkg from "elliptic";
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import * as _ from "lodash";
 
 const { ec } = pkg;
@@ -14,13 +14,13 @@ const generatePrivateKey = () => {
 
 const initWallet = () => {
   // let's not override existing private keys
-  if (existsSync(privateKeyLocation)) {
-    return;
-  }
-  const newPrivateKey = generatePrivateKey();
+  // if (existsSync(privateKeyLocation)) {
+  //   return;
+  // }
+  return generatePrivateKey();
 
-  writeFileSync(privateKeyLocation, newPrivateKey);
-  console.log("new wallet with private key created");
+  // writeFileSync(privateKeyLocation, newPrivateKey);
+  // console.log("new wallet with private key created");
 };
 
 const getPublicFromWallet = () => {
