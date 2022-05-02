@@ -1,3 +1,6 @@
+import * as CryptoJS from "crypto-js";
+import * as ecdsa from "elliptic";
+const ec = new ecdsa.ec("secp256k1");
 class TxOut {
   constructor(address, amount) {
     this.address = address;
@@ -40,6 +43,22 @@ const getTransactionId = (transaction) => {
     .reduce((a, b) => a + b, "");
 
   return CryptoJS.SHA256(txInContent + txOutContent).toString();
+};
+
+const findUnspentTxOut = (transactionId, index, aUnspentTxOuts) => {
+  return aUnspentTxOuts.find(
+    (uTxO) => uTxO.txOutId === transactionId && uTxO.txOutIndex === index
+  );
+};
+
+const getPublicKey = (aPrivateKey) => {
+  return ec.keyFromPrivate(aPrivateKey, "hex").getPublic().encode("hex");
+};
+
+const toHexString = (byteArray) => {
+  return Array.from(byteArray, (byte) => {
+    return ("0" + (byte & 0xff).toString(16)).slice(-2);
+  }).join("");
 };
 
 const signTxIn = (transaction, txInIndex, privateKey, aUnspentTxOuts) => {

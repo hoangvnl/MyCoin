@@ -33,3 +33,17 @@ const getBalance = (address, unspentTxOuts) => {
     .map((uTxO) => uTxO.amount)
     .sum();
 };
+
+const findTxOutsForAmount = (amount, myUnspentTxOuts) => {
+  let currentAmount = 0;
+  const includedUnspentTxOuts = [];
+  for (const myUnspentTxOut of myUnspentTxOuts) {
+    includedUnspentTxOuts.push(myUnspentTxOut);
+    currentAmount = currentAmount + myUnspentTxOut.amount;
+    if (currentAmount >= amount) {
+      const leftOverAmount = currentAmount - amount;
+      return { includedUnspentTxOuts, leftOverAmount };
+    }
+  }
+  throw Error("not enough coins to send transaction");
+};
