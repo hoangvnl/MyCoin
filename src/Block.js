@@ -1,5 +1,11 @@
 const SHA256 = require("crypto-js/sha256");
-
+import {
+  createTransaction,
+  getBalance,
+  getPrivateFromWallet,
+  getPublicFromWallet,
+} from "./wallet";
+import { getCoinbaseTransaction, isValidAddress } from "./transaction";
 // in seconds
 const BLOCK_GENERATION_INTERVAL = 10;
 
@@ -16,7 +22,9 @@ class Block {
     this.nonce = nonce;
   }
 }
-const blockchain = [getGenesisBlock()];
+let blockchain = [getGenesisBlock()];
+
+let unspentTxOuts = [];
 
 const calculateHash = (
   index,
@@ -46,6 +54,8 @@ const getGenesisBlock = () => {
   );
 };
 
+const getBlockchain = () => blockchain;
+
 const getLatestBlock = () => {
   return blockchain[blockchain.length - 1];
 };
@@ -68,6 +78,27 @@ const generateNextBlock = (blockData) => {
     previousBlock.hash,
     nextHash
   );
+};
+
+const generateNextBlockWithTransaction = (receiverAddress, amount) => {
+  if (!isValidAddress(receiverAddress)) {
+    throw Error("invalid address");
+  }
+  if (typeof amount !== "number") {
+    throw Error("invalid amount");
+  }
+  const coinbaseTx = getCoinbaseTransaction(
+    getPublicFromWallet(),
+    getLatestBlock().index + 1
+  );
+  const tx = createTransaction(
+    receiverAddress,
+    amount,
+    getPrivateFromWallet(),
+    unspentTxOuts
+  );
+  const blockData = [coinbaseTx, tx];
+  return generateRawNextBlock(blockData);
 };
 
 const calculateHashForBlock = (block) =>
@@ -181,4 +212,14 @@ const getAdjustedDifficulty = (latestBlock, aBlockchain) => {
   }
 };
 
-export { Block, generateNextBlock };
+const getAccountBalance = () => {
+  return getBalance(getPublicFromWallet(), unspentTxOuts);
+};
+
+export {
+  Block,
+  generateNextBlock,
+  getBlockchain,
+  getAccountBalance,
+  generateNextBlockWithTransaction,
+};

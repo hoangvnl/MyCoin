@@ -89,6 +89,33 @@ const signTxIn = (transaction, txInIndex, privateKey, aUnspentTxOuts) => {
   return signature;
 };
 
+const getCoinbaseTransaction = (address, blockIndex) => {
+  const t = new Transaction();
+  const txIn = new TxIn();
+  txIn.signature = "";
+  txIn.txOutId = "";
+  txIn.txOutIndex = blockIndex;
+
+  t.txIns = [txIn];
+  t.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
+  t.id = getTransactionId(t);
+  return t;
+};
+
+const isValidAddress = (address) => {
+  if (address.length !== 130) {
+    console.log("invalid public key length");
+    return false;
+  } else if (address.match("^[a-fA-F0-9]+$") === null) {
+    console.log("public key must contain only hex characters");
+    return false;
+  } else if (!address.startsWith("04")) {
+    console.log("public key must start with 04");
+    return false;
+  }
+  return true;
+};
+
 export {
   signTxIn,
   getTransactionId,
@@ -97,4 +124,6 @@ export {
   TxOut,
   getPublicKey,
   Transaction,
+  getCoinbaseTransaction,
+  isValidAddress,
 };
