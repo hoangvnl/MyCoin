@@ -1,6 +1,8 @@
 import * as CryptoJS from "crypto-js";
-import * as ecdsa from "elliptic";
-const ec = new ecdsa.ec("secp256k1");
+import EC from "elliptic";
+// Create and initialize EC context
+// (better do it once and reuse it)
+const ec = new EC.ec("secp256k1");
 class TxOut {
   constructor(address, amount) {
     this.address = address;

@@ -1,4 +1,4 @@
-const SHA256 = require("crypto-js/sha256");
+import cryptoPkg from "crypto-js";
 import {
   createTransaction,
   getBalance,
@@ -6,6 +6,9 @@ import {
   getPublicFromWallet,
 } from "./wallet";
 import { getCoinbaseTransaction, isValidAddress } from "./transaction";
+
+const { SHA256 } = cryptoPkg;
+
 // in seconds
 const BLOCK_GENERATION_INTERVAL = 10;
 
@@ -22,6 +25,17 @@ class Block {
     this.nonce = nonce;
   }
 }
+
+const getGenesisBlock = () => {
+  return new Block(
+    0,
+    "91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627",
+    "",
+    "1465154705",
+    "my genesis block!"
+  );
+};
+
 let blockchain = [getGenesisBlock()];
 
 let unspentTxOuts = [];
@@ -42,16 +56,6 @@ const calculateHash = (
       difficulty +
       nonce
   ).toString();
-};
-
-const getGenesisBlock = () => {
-  return new Block(
-    0,
-    "91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627",
-    "",
-    "1465154705",
-    "my genesis block!"
-  );
 };
 
 const getBlockchain = () => blockchain;

@@ -1,7 +1,8 @@
-import { ec } from "elliptic";
+import pkg from "elliptic";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import * as _ from "lodash";
 
+const { ec } = pkg;
 const EC = new ec("secp256k1");
 const privateKeyLocation = "node/wallet/private_key";
 
@@ -99,5 +100,4 @@ export {
   getPrivateFromWallet,
   getBalance,
   generatePrivateKey,
-  initWallet,
 };

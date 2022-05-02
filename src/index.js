@@ -1,5 +1,4 @@
 import express from "express";
-import startRoutes from "./start/routes";
 
 import {
   getBlockchain,
@@ -10,9 +9,6 @@ import {
 // Init Variables
 const app = express();
 const port = process.env.PORT || 5000;
-
-// Routes
-startRoutes(app);
 
 app.get("/blocks", (req, res) => {
   res.send(getBlockchain());
