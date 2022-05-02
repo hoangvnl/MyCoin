@@ -88,3 +88,13 @@ const signTxIn = (transaction, txInIndex, privateKey, aUnspentTxOuts) => {
 
   return signature;
 };
+
+export {
+  signTxIn,
+  getTransactionId,
+  UnspentTxOut,
+  TxIn,
+  TxOut,
+  getPublicKey,
+  Transaction,
+};

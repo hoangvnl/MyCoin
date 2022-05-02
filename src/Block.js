@@ -181,4 +181,4 @@ const getAdjustedDifficulty = (latestBlock, aBlockchain) => {
   }
 };
 
-export { Block, getLatestBlock, generateNextBlock, replaceChain };
+export { Block, generateNextBlock };
