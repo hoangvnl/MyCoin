@@ -1,5 +1,5 @@
 import pkg from "elliptic";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, writeFile } from "fs";
 import * as _ from "lodash";
 
 const { ec } = pkg;
@@ -18,9 +18,15 @@ const initWallet = () => {
   //   return;
   // }
   return generatePrivateKey();
+};
 
-  // writeFileSync(privateKeyLocation, newPrivateKey);
-  // console.log("new wallet with private key created");
+const accessWallet = (key) => {
+  try {
+    writeFileSync(privateKeyLocation, key);
+    return getPublicFromWallet();
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getPublicFromWallet = () => {
@@ -100,4 +106,5 @@ export {
   getPrivateFromWallet,
   getBalance,
   generatePrivateKey,
+  accessWallet,
 };

@@ -7,7 +7,7 @@ import {
   generateNextBlock,
   getAccountBalance,
 } from "./blockchain";
-import { initWallet } from "./wallet";
+import { initWallet, accessWallet } from "./wallet";
 import fileupload from "express-fileupload";
 
 // Init Variables
@@ -27,6 +27,11 @@ app.get("/createWallet", (req, res) => {
 
 app.post("/accessWallet", (req, res) => {
   const buffer = req.files.private_key.data.toString();
+  try {
+    res.status(200).send(accessWallet(buffer));
+  } catch (err) {
+    res.status(400).send("error", err);
+  }
 });
 
 app.get("/blocks", (req, res) => {
