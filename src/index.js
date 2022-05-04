@@ -6,8 +6,11 @@ import {
   getBlockchain,
   generateNextBlock,
   getAccountBalance,
+  generateNextBlockWithTransaction,
+  sendTransaction,
 } from "./blockchain";
 import { initWallet, accessWallet } from "./wallet";
+
 import fileupload from "express-fileupload";
 
 // Init Variables
@@ -50,6 +53,34 @@ app.post("/mineBlock", (req, res) => {
 app.get("/balance", (req, res) => {
   const balance = getAccountBalance();
   res.send({ balance: balance });
+});
+
+app.post("/mineTransaction", (req, res) => {
+  const address = req.body.address;
+  const amount = req.body.amount;
+  try {
+    const resp = generateNextBlockWithTransaction(address, amount);
+    res.send(resp);
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send(e.message);
+  }
+});
+
+app.post("/sendTransaction", (req, res) => {
+  try {
+    const address = req.body.address;
+    const amount = req.body.amount;
+
+    if (address === undefined || amount === undefined) {
+      throw Error("invalid address or amount");
+    }
+    const resp = sendTransaction(address, amount);
+    res.send(resp);
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send(e.message);
+  }
 });
 
 app.use((err, req, res, next) => {
