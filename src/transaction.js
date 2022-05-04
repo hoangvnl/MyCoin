@@ -1,8 +1,10 @@
-import * as CryptoJS from "crypto-js";
+import sha256 from "crypto-js/sha256";
 import EC from "elliptic";
 // Create and initialize EC context
 // (better do it once and reuse it)
 const ec = new EC.ec("secp256k1");
+const COINBASE_AMOUNT = 50;
+
 class TxOut {
   constructor(address, amount) {
     this.address = address;
@@ -35,6 +37,34 @@ class UnspentTxOut {
   }
 }
 
+const processTransactions = (aTransactions, aUnspentTxOuts, blockIndex) => {
+  return updateUnspentTxOuts(aTransactions, aUnspentTxOuts);
+};
+
+const updateUnspentTxOuts = (aTransactions, aUnspentTxOuts) => {
+  const newUnspentTxOuts = aTransactions
+    .map((t) => {
+      return t.txOuts.map(
+        (txOut, index) =>
+          new UnspentTxOut(t.id, index, txOut.address, txOut.amount)
+      );
+    })
+    .reduce((a, b) => a.concat(b), []);
+
+  const consumedTxOuts = aTransactions
+    .map((t) => t.txIns)
+    .reduce((a, b) => a.concat(b), [])
+    .map((txIn) => new UnspentTxOut(txIn.txOutId, txIn.txOutIndex, "", 0));
+
+  const resultingUnspentTxOuts = aUnspentTxOuts
+    .filter(
+      (uTxO) => !findUnspentTxOut(uTxO.txOutId, uTxO.txOutIndex, consumedTxOuts)
+    )
+    .concat(newUnspentTxOuts);
+
+  return resultingUnspentTxOuts;
+};
+
 const getTransactionId = (transaction) => {
   const txInContent = transaction.txIns
     .map((txIn) => txIn.txOutId + txIn.txOutIndex)
@@ -44,7 +74,7 @@ const getTransactionId = (transaction) => {
     .map((txOut) => txOut.address + txOut.amount)
     .reduce((a, b) => a + b, "");
 
-  return CryptoJS.SHA256(txInContent + txOutContent).toString();
+  return sha256(txInContent + txOutContent).toString();
 };
 
 const findUnspentTxOut = (transactionId, index, aUnspentTxOuts) => {
@@ -128,4 +158,5 @@ export {
   Transaction,
   getCoinbaseTransaction,
   isValidAddress,
+  processTransactions,
 };

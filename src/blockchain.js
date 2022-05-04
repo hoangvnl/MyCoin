@@ -5,8 +5,12 @@ import {
   getPrivateFromWallet,
   getPublicFromWallet,
 } from "./wallet";
-import { getCoinbaseTransaction, isValidAddress } from "./transaction";
-
+import {
+  getCoinbaseTransaction,
+  isValidAddress,
+  processTransactions,
+} from "./transaction";
+import { hexToBinary } from "./util";
 const { SHA256 } = cryptoPkg;
 
 // in seconds
@@ -32,7 +36,9 @@ const getGenesisBlock = () => {
     "91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627",
     "",
     "1465154705",
-    "my genesis block!"
+    "my genesis block!",
+    1,
+    0
   );
 };
 
@@ -64,32 +70,57 @@ const getLatestBlock = () => {
   return blockchain[blockchain.length - 1];
 };
 
-const generateNextBlock = (blockData) => {
+const getCurrentTimestamp = () => Math.round(new Date().getTime() / 1000);
+
+const generateRawNextBlock = (blockData) => {
   const previousBlock = getLatestBlock();
+  const difficulty = getDifficulty(getBlockchain());
   const nextIndex = previousBlock.index + 1;
-  const nextTimestamp = new Data().getTime() / 1000;
-  const nextHash = calculateHash(
+  const nextTimestamp = getCurrentTimestamp();
+  const newBlock = findBlock(
     nextIndex,
     previousBlock.hash,
-    nextTimestamp,
-    JSON.stringify(blockData)
-  );
-
-  return new Block(
-    nextIndex,
     nextTimestamp,
     blockData,
-    previousBlock.hash,
-    nextHash
+    difficulty
   );
+  if (addBlockToChain(newBlock)) {
+    return newBlock;
+  } else {
+    return null;
+  }
+};
+
+const addBlockToChain = (newBlock) => {
+  if (isValidNewBlock(newBlock, getLatestBlock())) {
+    const retVal = processTransactions(
+      newBlock.data,
+      unspentTxOuts,
+      newBlock.index
+    );
+    if (retVal === null) {
+      return false;
+    } else {
+      blockchain.push(newBlock);
+      unspentTxOuts = retVal;
+      return true;
+    }
+  }
+  return false;
+};
+
+const generateNextBlock = () => {
+  const coinbaseTx = getCoinbaseTransaction(
+    getPublicFromWallet(),
+    getLatestBlock().index + 1
+  );
+  const blockData = [coinbaseTx];
+  return generateRawNextBlock(blockData);
 };
 
 const generateNextBlockWithTransaction = (receiverAddress, amount) => {
   if (!isValidAddress(receiverAddress)) {
     throw Error("invalid address");
-  }
-  if (typeof amount !== "number") {
-    throw Error("invalid amount");
   }
   const coinbaseTx = getCoinbaseTransaction(
     getPublicFromWallet(),
@@ -119,11 +150,8 @@ const isValidNewBlock = (newBlock, previousBlock) => {
   if (previousBlock.index + 1 !== newBlock.index) {
     console.log("invalid index");
     return false;
-  } else if (previousBlock.hash !== newBlock.previousHash) {
+  } else if (previousBlock.hash !== newBlock.precedingHash) {
     console.log("invalid previous hash");
-    return false;
-  } else if (calculateHashForBlock(newBlock) !== newBlock.hash) {
-    console.log("invalid hash");
     return false;
   }
   return true;

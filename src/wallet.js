@@ -1,7 +1,8 @@
 import pkg from "elliptic";
 import { existsSync, readFileSync, writeFileSync, writeFile } from "fs";
-import * as _ from "lodash";
+import lodashPkg from "lodash";
 
+const { sum } = lodashPkg;
 const { ec } = pkg;
 const EC = new ec("secp256k1");
 const privateKeyLocation = "node/wallet/private_key";
@@ -36,10 +37,11 @@ const getPublicFromWallet = () => {
 };
 
 const getBalance = (address, unspentTxOuts) => {
-  return _(unspentTxOuts)
-    .filter((uTxO) => uTxO.address === address)
-    .map((uTxO) => uTxO.amount)
-    .sum();
+  return sum(
+    unspentTxOuts
+      .filter((uTxO) => uTxO.address === address)
+      .map((uTxO) => uTxO.amount)
+  );
 };
 
 const findTxOutsForAmount = (amount, myUnspentTxOuts) => {
