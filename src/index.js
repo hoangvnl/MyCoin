@@ -1,5 +1,4 @@
 import express from "express";
-import multer from "multer";
 import cors from "cors";
 import bodyParser from "body-parser";
 import {
@@ -8,6 +7,8 @@ import {
   getAccountBalance,
   generateNextBlockWithTransaction,
   sendTransaction,
+  getUnspentTxOuts,
+  getMyUnspentTransactionOutputs,
 } from "./blockchain";
 import { initWallet, accessWallet } from "./wallet";
 
@@ -67,6 +68,10 @@ app.post("/mineTransaction", (req, res) => {
   }
 });
 
+app.get("/unspentTransactionOutputs", (req, res) => {
+  res.send(getUnspentTxOuts());
+});
+
 app.post("/sendTransaction", (req, res) => {
   try {
     const address = req.body.address;
@@ -81,6 +86,19 @@ app.post("/sendTransaction", (req, res) => {
     console.log(e.message);
     res.status(400).send(e.message);
   }
+});
+
+app.get("/unspentTransactionOutputs", (req, res) => {
+  res.send(getUnspentTxOuts());
+});
+
+app.get("/myUnspentTransactionOutputs", (req, res) => {
+  res.send(getMyUnspentTransactionOutputs());
+});
+
+app.post("/stop", (req, res) => {
+  res.send({ msg: "stopping server" });
+  process.exit();
 });
 
 app.use((err, req, res, next) => {

@@ -2,7 +2,7 @@ import sha256 from "crypto-js/sha256";
 import EC from "elliptic";
 import lodashPkg from "lodash";
 
-const { flatten, countBy, includes, map } = lodashPkg;
+const { flatten, countBy, includes, map, values } = lodashPkg;
 
 const ec = new EC.ec("secp256k1");
 
@@ -33,7 +33,7 @@ class TxOut {
 }
 
 class Transaction {
-  constructor(txOutId, txOutIndex, signature) {
+  constructor(id, txIns, txOuts) {
     this.id = id;
     this.txIns = txIns;
     this.txOuts = txOuts;
@@ -100,7 +100,7 @@ const validateBlockTransactions = (
   }
 
   // check for duplicate txIns. Each txIn can be included only once
-  const txIns = flatten(aTransactions.map((tx) => tx.txIns)).values();
+  const txIns = values(flatten(map(aTransactions, (tx) => tx.txIns)));
 
   if (hasDuplicates(txIns)) {
     return false;

@@ -1,6 +1,6 @@
 import ecPkg from "elliptic";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
-import * as _ from "lodash";
+import lodashPkg from "lodash";
 import {
   getPublicKey,
   getTransactionId,
@@ -8,8 +8,8 @@ import {
   Transaction,
   TxIn,
   TxOut,
-  UnspentTxOut,
 } from "./transaction";
+const { map, sum, filter, find, without, flatten, values } = lodashPkg;
 const { ec } = ecPkg;
 const EC = new ec("secp256k1");
 const privateKeyLocation = process.env.PRIVATE_KEY || "node/wallet/private_key";
@@ -51,13 +51,15 @@ const deleteWallet = () => {
 };
 
 const getBalance = (address, unspentTxOuts) => {
-  return _(findUnspentTxOuts(address, unspentTxOuts))
-    .map((uTxO) => uTxO.amount)
-    .sum();
+  return sum(
+    map(findUnspentTxOuts(address, unspentTxOuts), (uTxO) => uTxO.amount)
+  );
 };
 
 const findUnspentTxOuts = (ownerAddress, unspentTxOuts) => {
-  return _.filter(unspentTxOuts, (uTxO) => uTxO.address === ownerAddress);
+  console.log(ownerAddress);
+  console.log(unspentTxOuts);
+  return filter(unspentTxOuts, (uTxO) => uTxO.address === ownerAddress);
 };
 
 const findTxOutsForAmount = (amount, myUnspentTxOuts) => {
@@ -92,13 +94,11 @@ const createTxOuts = (receiverAddress, myAddress, amount, leftOverAmount) => {
 };
 
 const filterTxPoolTxs = (unspentTxOuts, transactionPool) => {
-  const txIns = _(transactionPool)
-    .map((tx) => tx.txIns)
-    .flatten()
-    .value();
+  const txIns = values(flatten(map(transactionPool, (tx) => tx.txIns)));
+
   const removable = [];
   for (const unspentTxOut of unspentTxOuts) {
-    const txIn = _.find(txIns, (aTxIn) => {
+    const txIn = find(txIns, (aTxIn) => {
       return (
         aTxIn.txOutIndex === unspentTxOut.txOutIndex &&
         aTxIn.txOutId === unspentTxOut.txOutId
@@ -111,7 +111,7 @@ const filterTxPoolTxs = (unspentTxOuts, transactionPool) => {
     }
   }
 
-  return _.without(unspentTxOuts, ...removable);
+  return without(unspentTxOuts, ...removable);
 };
 
 const createTransaction = (

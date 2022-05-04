@@ -1,10 +1,12 @@
-import * as _ from "lodash";
+import lodashPkg from "lodash";
 import { validateTransaction } from "./transaction";
+
+const { cloneDeep, without, flatten, map, values, find } = lodashPkg;
 
 let transactionPool = [];
 
 const getTransactionPool = () => {
-  return _.cloneDeep(transactionPool);
+  return cloneDeep(transactionPool);
 };
 
 const addToTransactionPool = (tx, unspentTxOuts) => {
@@ -41,22 +43,19 @@ const updateTransactionPool = (unspentTxOuts) => {
       "removing the following transactions from txPool: %s",
       JSON.stringify(invalidTxs)
     );
-    transactionPool = _.without(transactionPool, ...invalidTxs);
+    transactionPool = without(transactionPool, ...invalidTxs);
   }
 };
 
 const getTxPoolIns = (aTransactionPool) => {
-  return _(aTransactionPool)
-    .map((tx) => tx.txIns)
-    .flatten()
-    .value();
+  return values(flatten(map((aTransactionPool, (tx) => tx.txIns))));
 };
 
 const isValidTxForPool = (tx, aTtransactionPool) => {
   const txPoolIns = getTxPoolIns(aTtransactionPool);
 
   const containsTxIn = (txIns, txIn) => {
-    return _.find(txPoolIns, (txPoolIn) => {
+    return find(txPoolIns, (txPoolIn) => {
       return (
         txIn.txOutIndex === txPoolIn.txOutIndex &&
         txIn.txOutId === txPoolIn.txOutId

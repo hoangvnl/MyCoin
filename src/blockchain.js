@@ -1,5 +1,5 @@
-import * as CryptoJS from "crypto-js";
-import * as _ from "lodash";
+import sha256 from "crypto-js/sha256";
+import lodashPkg from "lodash";
 
 import {
   getCoinbaseTransaction,
@@ -22,6 +22,7 @@ import {
   getPublicFromWallet,
 } from "./wallet";
 
+const { cloneDeep } = lodashPkg;
 class Block {
   constructor(index, hash, previousHash, timestamp, data, difficulty, nonce) {
     this.index = index;
@@ -63,7 +64,7 @@ let unspentTxOuts = processTransactions(blockchain[0].data, [], 0);
 
 const getBlockchain = () => blockchain;
 
-const getUnspentTxOuts = () => _.cloneDeep(unspentTxOuts);
+const getUnspentTxOuts = () => cloneDeep(unspentTxOuts);
 
 // and txPool should be only updated at the same time
 const setUnspentTxOuts = (newUnspentTxOut) => {
@@ -121,7 +122,6 @@ const generateRawNextBlock = (blockData) => {
     difficulty
   );
   if (addBlockToChain(newBlock)) {
-    broadcastLatest();
     return newBlock;
   } else {
     return null;
@@ -203,7 +203,6 @@ const sendTransaction = (address, amount) => {
     getTransactionPool()
   );
   addToTransactionPool(tx, getUnspentTxOuts());
-  broadCastTransactionPool();
   return tx;
 };
 
@@ -225,7 +224,7 @@ const calculateHash = (
   difficulty,
   nonce
 ) =>
-  CryptoJS.SHA256(
+  sha256(
     index + previousHash + timestamp + data + difficulty + nonce
   ).toString();
 
@@ -376,7 +375,6 @@ const replaceChain = (newBlocks) => {
     blockchain = newBlocks;
     setUnspentTxOuts(aUnspentTxOuts);
     updateTransactionPool(unspentTxOuts);
-    broadcastLatest();
   } else {
     console.log("Received blockchain invalid");
   }
