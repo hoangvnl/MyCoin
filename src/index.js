@@ -10,6 +10,7 @@ import {
   getUnspentTxOuts,
   getMyUnspentTransactionOutputs,
 } from "./blockchain";
+import { getTransactionPool } from "./transactionPool";
 import { initWallet, accessWallet } from "./wallet";
 
 import fileupload from "express-fileupload";
@@ -94,6 +95,10 @@ app.get("/unspentTransactionOutputs", (req, res) => {
 
 app.get("/myUnspentTransactionOutputs", (req, res) => {
   res.send(getMyUnspentTransactionOutputs());
+});
+
+app.get("/transactionPool", (req, res) => {
+  res.send(getTransactionPool());
 });
 
 app.post("/stop", (req, res) => {

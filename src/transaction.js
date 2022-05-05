@@ -315,42 +315,9 @@ const isValidTxOutStructure = (txOut) => {
   } else if (!isValidAddress(txOut.address)) {
     console.log("invalid TxOut address");
     return false;
-  } else if (typeof txOut.amount !== "number") {
-    console.log("invalid amount type in txOut");
-    return false;
   } else {
     return true;
   }
-};
-
-const isValidTransactionStructure = (transaction) => {
-  if (typeof transaction.id !== "string") {
-    console.log("transactionId missing");
-    return false;
-  }
-  if (!(transaction.txIns instanceof Array)) {
-    console.log("invalid txIns type in transaction");
-    return false;
-  }
-  if (
-    !transaction.txIns.map(isValidTxInStructure).reduce((a, b) => a && b, true)
-  ) {
-    return false;
-  }
-
-  if (!(transaction.txOuts instanceof Array)) {
-    console.log("invalid txIns type in transaction");
-    return false;
-  }
-
-  if (
-    !transaction.txOuts
-      .map(isValidTxOutStructure)
-      .reduce((a, b) => a && b, true)
-  ) {
-    return false;
-  }
-  return true;
 };
 
 // valid address is a valid ecdsa public key in the 04 + X-coordinate + Y-coordinate format

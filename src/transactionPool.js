@@ -10,13 +10,6 @@ const getTransactionPool = () => {
 };
 
 const addToTransactionPool = (tx, unspentTxOuts) => {
-  if (!validateTransaction(tx, unspentTxOuts)) {
-    throw Error("Trying to add invalid tx to pool");
-  }
-
-  if (!isValidTxForPool(tx, transactionPool)) {
-    throw Error("Trying to add invalid tx to pool");
-  }
   console.log("adding to txPool: %s", JSON.stringify(tx));
   transactionPool.push(tx);
 };
